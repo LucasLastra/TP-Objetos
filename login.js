@@ -1,53 +1,51 @@
-import * as ReadlineSync from 'readline-sync';
-class Login {
-    private user: string;
-    private mail: string;
-    private pass: string;
-    constructor(userInic?: string, mailInic?: string, passInic?: string) {
+"use strict";
+exports.__esModule = true;
+var ReadlineSync = require("readline-sync");
+var Login = /** @class */ (function () {
+    function Login(userInic, mailInic, passInic) {
         if (userInic) {
             this.user = userInic;
-        } else {
+        }
+        else {
             this.logUser();
         }
         if (mailInic) {
             this.mail = mailInic;
-        } else {
+        }
+        else {
             this.logMail();
         }
         if (passInic) {
             this.pass = passInic;
-        } else {
+        }
+        else {
             this.logPass();
         }
-
     }
-    public login() {
-
-    }
-    public signUp() {
+    Login.prototype.login = function () {
+    };
+    Login.prototype.signUp = function () {
         console.log('----Bienvenido! Para registrarte ingrese usuario, mail y contraseña.----');
         this.logUser();
         this.logMail();
         this.logPass();
         console.log(this.user);
-    }
-    public logUser() {
+    };
+    Login.prototype.logUser = function () {
         console.log('----Bienvenido! Para registrarte ingrese usuario, mail y contraseña.----');
         this.user = ReadlineSync.question('Escribir Nombre de usuario: ');
-    }
-    public logMail() {
+    };
+    Login.prototype.logMail = function () {
         console.log('----Bienvenido! Para registrarte ingrese usuario, mail y contraseña.----');
         this.mail = ReadlineSync.question('Escribir mail: ');
-    }
-    public logPass() {
+    };
+    Login.prototype.logPass = function () {
         console.log('----Bienvenido! Para registrarte ingrese usuario, mail y contraseña.----');
         this.pass = ReadlineSync.question('Escribir contraseña: ');
-    }
-
-}
-
-let log1: Login = new Login('Lucas', 'lucas@gmail');
-
+    };
+    return Login;
+}());
+var log1 = new Login('Lucas', 'lucas@gmail');
 console.log(log1);
 log1.signUp();
 console.log(log1);
