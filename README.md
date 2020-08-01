@@ -24,17 +24,22 @@ Bcrypt consta de varias definiciones: salt, saltRound, hash, entre otras.
 Una de las formas de utilizar esta libreria:
 
 //definir la cantidad de saltRounds
+
 const saltRounds = 10;
 
 //definir salt con sus saltRounds
+
 const salt = bcrypt.genSaltSync(saltRounds);
 
 //contraseña a encriptar
+
 let password = "contraseña1";
 
 //generar un hash con la contraseña y salt
+
 let hash = bcrypt.hashSync(password, salt);
 
 //y por ultimo comparar la contraseña con el hash de la misma, de ser correcta devuelve true.
-let boolean = bcrypt.compareSync(password, hash);
+
+ let boolean = bcrypt.compareSync(password, hash);
 
