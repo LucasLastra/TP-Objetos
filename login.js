@@ -4,81 +4,137 @@ var ReadlineSync = require("readline-sync");
 var bcrypt = require('bcrypt');
 var saltRounds = 10;
 var salt = bcrypt.genSaltSync(saltRounds);
-/*
-bcrypt.genSalt(saltRounds, function(err, salt) {
-    bcrypt.hash(myPlaintextPassword, salt, function(err, hash) {
-        // Store hash in your password DB.
-    });
-});
-
-// Load hash from the db, which was preivously stored
-bcrypt.compare(myPlaintextPassword, hash, function(err, res) {
-    if(res == true){
-        console.log('siiii');
-    }else{
-        console.log('noooo');
-    }
-  // if res == true, password matched
-  // else wrong password
-});
-*/
+var comando;
+var iniciarSesion = false;
+var exit = false;
+var array = [];
+var i = 0;
 var Login = /** @class */ (function () {
     function Login(userInic, mailInic, passInic) {
+        this.regPassword = new RegistroPassword;
         if (userInic) {
             this.user = userInic;
         }
         else {
-            this.createUser();
+            cuenta.createUser();
         }
         if (mailInic) {
             this.mail = mailInic;
         }
         else {
-            this.createMail();
+            cuenta.createMail();
         }
         if (passInic) {
-            this.pass = passInic;
-            this.hash = bcrypt.hashSync(this.pass, salt);
+            this.regPassword.pass = passInic;
+            this.regPassword.hash = bcrypt.hashSync(this.regPassword.pass, salt);
         }
         else {
-            this.createPass();
-            this.logIn();
+            cuenta.regPassword.createPass();
         }
+        array.push(this);
     }
+    Login.prototype.createPass = function () {
+        this.regPassword.createPass();
+    };
     Login.prototype.logIn = function () {
         console.log('----Iniciar sesion.----');
-        var boolean1 = this.logUser();
-        var boolean2 = this.logPass();
-        if (boolean1 == true && boolean2 == true) {
-            console.log('----Has iniciado sesion correctamente.----');
+        cuenta.logUser();
+        cuenta.regPassword.logPass();
+        console.log(cuenta);
+        //compara la contraseña con el hash.
+        cuenta.regPassword.booleanPass = bcrypt.compareSync(cuenta.regPassword.pass, cuenta.regPassword.hash);
+        console.log(cuenta.booleanUser);
+        console.log(cuenta.regPassword.booleanPass);
+        if (cuenta.regPassword.booleanPass == true && cuenta.booleanUser == true) {
+            console.log("----Has iniciado sesion correctamente, " + cuenta.user + "!----");
+            iniciarSesion = true;
         }
         else {
             console.log('----El nombre de usuario o contraseña son incorrectos!----');
             this.logIn();
         }
+        while (iniciarSesion == true) {
+            console.log("* Nombre: " + cuenta.user + " *");
+            console.log("* Mail: " + cuenta.mail + " *");
+            console.log("* contrase\u00F1a: " + cuenta.regPassword.pass + " *");
+            console.log("----Bienvenid@ de nuevo, " + cuenta.user + "! Que deseas hacer?----");
+            console.log('-- 1: Cambiar nombre de usuario. --');
+            console.log('-- 2: Cambiar mail. --');
+            console.log('-- 3: Cambiar contraseña. --');
+            console.log('-- 4: Eliminar cuenta. --');
+            console.log('-- 0: Cerrar sesion. --');
+            comando = ReadlineSync.question('>>> ');
+            //Intenté hacierlo con switch pero no funcionaban las acciones (ej: cuenta.logIn();).
+            if (comando == 1) {
+                cuenta.createUser();
+            }
+            else {
+                if (comando == 2) {
+                    cuenta.createMail();
+                }
+                else {
+                    if (comando == 3) {
+                        cuenta.createPass();
+                    }
+                    else {
+                        if (comando == 4) {
+                            cuenta.deleteAccount();
+                        }
+                        else {
+                            if (comando == 0) {
+                                console.log('Cerrando la sesion...');
+                                iniciarSesion = false;
+                            }
+                            else {
+                                console.log('--Comando incorrecto!--');
+                            }
+                        }
+                    }
+                }
+            }
+        }
     };
     Login.prototype.signUp = function () {
         console.log('----Bienvenido! Para registrarte ingrese usuario, mail y contraseña.----');
-        this.createUser();
-        this.createPass();
-        console.log(this.user);
+        var user = ReadlineSync.question('Escribir usuario: ');
+        var mail = ReadlineSync.question('Escribir mail: ');
+        var pass = ReadlineSync.question('Escribir contraseña: ');
+        cuenta = new Login(user, mail, pass);
+        cuenta = array[array.length - 1];
+        console.log(cuenta);
     };
     Login.prototype.logUser = function () {
         var compareUser = ReadlineSync.question('Escribir usuario: ');
-        if (this.user == compareUser) {
-            return true;
+        var temp;
+        cuenta.booleanUser = false;
+        for (var i_1 = 0; i_1 < array.length; i_1++) {
+            cuenta = array[i_1];
+            if (cuenta.user == compareUser) {
+                temp = i_1;
+                cuenta.booleanUser = true;
+                cuenta = array[temp];
+                console.log('user: ' + cuenta.booleanUser);
+                break;
+            }
         }
-        else {
-            return false;
+    };
+    Login.prototype.deleteAccount = function () {
+        this.regPassword.comparePass();
+        for (var i_2 = 0; i_2 < array.length; i_2++) {
+            if (cuenta == array[i_2]) {
+                array.splice(i_2, 1);
+                console.log(array);
+            }
         }
+        console.log('--Cuenta eliminada.--');
+        iniciarSesion = false;
     };
     Login.prototype.createMail = function () {
         console.log('----Crear mail nuevo.----');
         if (this.mail) {
             //si ya existe el mail, confirmar pass y escribir nuevo.
-            var comparePass = ReadlineSync.question('Escribir contraseña: ');
-            this.boolean = bcrypt.compareSync(comparePass, this.hash);
-            if (this.boolean == true) {
+            this.regPassword.comparePass();
+            if (this.regPassword.booleanPass == true) {
                 this.mail = ReadlineSync.question('Escribir mail nuevo: ');
             }
             else {
@@ -89,17 +145,18 @@ var Login = /** @class */ (function () {
         else {
             //si no hay mail, escribirlo.
             this.mail = ReadlineSync.question('Escribir mail nuevo: ');
+            console.log("----Mail de " + this.user + ": " + this.mail + ".----");
         }
     };
     Login.prototype.createUser = function () {
-        console.log('----Crear usuario nuevo.----');
-        if (this.user) {
+        if (cuenta.user) {
+            console.log("----Crear usuario nuevo para " + this.user + ".----");
             //si ya existe el usuario, confirmar pass y escribir nuevo.
-            var comparePass = ReadlineSync.question('Escribir contraseña: ');
-            this.boolean = bcrypt.compareSync(comparePass, this.hash);
-            if (this.boolean == true) {
+            this.regPassword.comparePass();
+            console.log(this);
+            if (this.regPassword.booleanPass === true) {
                 this.user = ReadlineSync.question('Escribir usuario nuevo: ');
-                console.log('----Usuario cambiado correctamente!----');
+                console.log("----Usuario cambiado correctamente, " + this.user + "!----");
             }
             else {
                 console.log('----La contraseña es incorrecta!----');
@@ -107,17 +164,26 @@ var Login = /** @class */ (function () {
             }
         }
         else {
+            console.log("----Crear usuario nuevo.----");
             //si no hay usuario, escribirlo.
-            this.user = ReadlineSync.question('Escribir usuario nuevo: ');
+            cuenta.user = ReadlineSync.question('Escribir usuario nuevo: ');
         }
     };
-    Login.prototype.createPass = function () {
+    return Login;
+}());
+var RegistroPassword = /** @class */ (function () {
+    function RegistroPassword() {
+        if (this.pass) {
+            this.hash = bcrypt.hashSync(this.pass, salt);
+        }
+    }
+    RegistroPassword.prototype.createPass = function () {
         console.log('----Crear contraseña nueva.----');
         if (this.pass) {
             //si ya existe la pass, confirmar la anterior y escribir nueva.
             var oldPass = ReadlineSync.question('Escribir contraseña anterior: ');
-            this.boolean = bcrypt.compareSync(oldPass, this.hash);
-            if (this.boolean == true) {
+            var boolean = bcrypt.compareSync(oldPass, this.hash);
+            if (boolean == true) {
                 this.pass = ReadlineSync.question('Escribir contraseña nueva: ');
                 console.log('----La contraseña se cambio correctamente!----');
             }
@@ -133,24 +199,50 @@ var Login = /** @class */ (function () {
         //crea hash para nueva pass.
         this.hash = bcrypt.hashSync(this.pass, salt);
     };
-    Login.prototype.logPass = function () {
+    RegistroPassword.prototype.logPass = function () {
         this.pass = ReadlineSync.question('Escribir contraseña: ');
-        //compara la contraseña con el hash.
-        this.boolean = bcrypt.compareSync(this.pass, this.hash);
-        if (this.boolean == true) {
-            return true;
-        }
-        else {
-            return false;
-        }
     };
-    return Login;
+    RegistroPassword.prototype.comparePass = function () {
+        var pass = ReadlineSync.question('Escribir contraseña: ');
+        this.booleanPass = bcrypt.compareSync(pass, this.hash);
+        console.log(this.booleanPass);
+    };
+    return RegistroPassword;
 }());
-var log1 = new Login('Lucas', 'lucas@gmail');
-var log2 = new Login();
+var log1 = new Login('lucas', 'lucas@gmail', '123');
+var log2 = new Login('pepe', 'pepe@', 'lala');
+var cuenta = new Login('carlos', 'carlos@', 'carlitos');
 console.log(log2);
 console.log(log1);
-log1.createUser();
-log1.createPass();
-log1.createMail();
-console.log(log1);
+while (exit == false) {
+    console.log("Bienvenid@ al servidor! Que deseas hacer?");
+    console.log('-- 1: Iniciar sesion. --');
+    console.log('-- 2: Crear una cuenta. --');
+    console.log('-- 3: Ver registros. --');
+    console.log('-- 0: Salir del servidor. --');
+    comando = ReadlineSync.question('>>> ');
+    //Intenté hacierlo con switch pero no funcionaban las acciones (ej: cuenta.logIn();).
+    if (comando == 1) {
+        cuenta.logIn();
+    }
+    else {
+        if (comando == 2) {
+            cuenta.signUp();
+            cuenta.logIn();
+        }
+        else {
+            if (comando == 3) {
+                console.log(array);
+            }
+            else {
+                if (comando == 0) {
+                    console.log('Saliendo del servidor...');
+                    exit = true;
+                }
+                else {
+                    console.log('--Comando incorrecto!--');
+                }
+            }
+        }
+    }
+}
