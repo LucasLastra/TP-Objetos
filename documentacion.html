@@ -1,0 +1,43 @@
+clase Login {
+    variables_internas
+    user: string;
+    booleanUser: boolean;
+    regPassword: RegistroPassword;
+    regAccounts: RegistroAccounts;
+
+    métodos
+    logIn(): void
+    signUp(): void
+    logUser(): void
+    deleteAccount(): void
+    createMail(): void
+    createUser(): void
+    createPass(): void
+    }
+
+clase RegistroPassword {
+    variables_internas
+    saltRounds: number
+    salt
+    pass: string;
+    hash: string;
+    booleanPass: boolean;
+
+    métodos
+    createPass(): void
+    logPass(): void
+    comparePass(): void
+}
+
+clase RegistroAccounts {
+    variables_internas
+    mail: string;
+
+    métodos
+    logIn(): void
+    createUser(): void
+    signUp(): void
+    delete(): void
+    logUser(): void
+    createMail(): void
+}
